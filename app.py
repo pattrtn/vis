@@ -146,7 +146,7 @@ if st.button("Run"):
 
     # Display filtered GeoDataFrame
     st.write("**Filtered GeoDataFrame:**")
-    st.dataframe(mapped_gdf)
+    st.write(str(mapped_gdf))
 
     # Plot filtered geo-location data
     st.subheader("Geo-Location Visualization")
