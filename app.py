@@ -148,9 +148,9 @@ if st.button("Run"):
     st.write("**Filtered Data:**")
     st.dataframe(mapped_data)
 
-    # Plot locations on Thailand map
+    # Plot locations on Thailand map divided by provinces
     if not mapped_data.empty:
-        st.subheader("Location Visualization on Thailand Map")
+        st.subheader("Location Visualization by Province")
         fig, ax = plt.subplots(figsize=(10, 8))
 
         # Initialize Basemap for Thailand
@@ -165,13 +165,20 @@ if st.button("Run"):
         m.drawmapboundary(fill_color='aqua')
         m.fillcontinents(color='lightgray', lake_color='aqua')
 
-        # Plot each location
-        lons = mapped_data['longitude'].tolist()
-        lats = mapped_data['latitude'].tolist()
-        x, y = m(lons, lats)
-        m.scatter(x, y, marker='o', color='red', zorder=5)
+        # Plot each province with a unique color
+        provinces = mapped_data['province'].unique()
+        colors = plt.cm.tab20(range(len(provinces)))
+        province_color_map = {province: colors[i] for i, province in enumerate(provinces)}
 
-        plt.title("Filtered Locations in Thailand", fontsize=16)
+        for province in provinces:
+            province_data = mapped_data[mapped_data['province'] == province]
+            lons = province_data['longitude'].tolist()
+            lats = province_data['latitude'].tolist()
+            x, y = m(lons, lats)
+            m.scatter(x, y, marker='o', color=province_color_map[province], label=province, zorder=5)
+
+        plt.legend(loc='lower left', fontsize=8)
+        plt.title("Filtered Locations by Province in Thailand", fontsize=16)
         st.pyplot(fig)
     else:
         st.write("No matching geographic data found.")
