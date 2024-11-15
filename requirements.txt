@@ -7,3 +7,4 @@ openpyxl
 geopandas
 matplotlib
 basemap
+folium
