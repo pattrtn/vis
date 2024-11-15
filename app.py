@@ -64,9 +64,11 @@ def tokens_to_features(tokens, i):
 file_path = './thaidata.xlsx'
 data = pd.read_excel(file_path, sheet_name='db')
 tambon_options = [""] + data['TambonThaiShort'].dropna().unique().tolist()  # Subdistrict options with default
-
 district_options = [""] + data['DistrictThaiShort'].dropna().unique().tolist()  # District options with default
 province_options = [""] + data['ProvinceThai'].dropna().unique().tolist()  # Province options with default
+
+# Map postal codes to district, subdistrict, and province
+postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai'])['PostCodeMain'].to_dict()
 
 # Streamlit app setup
 st.title("NER Model Visualization")
@@ -89,7 +91,13 @@ if model_file:
     district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
     subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
     province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
-    postal_code = st.text_input("รหัสไปรษณีย์ (Postal Code):")  # Postal code field
+
+    # Automatically determine postal code based on district, subdistrict, and province
+    postal_code = ""
+    if district and subdistrict and province:
+        postal_code = postal_code_mapping.get((district, subdistrict, province), "")
+
+    st.text_input("รหัสไปรษณีย์ (Postal Code):", value=postal_code, disabled=True)  # Display postal code as a read-only field
 
     # Run button
     if st.button("Run"):
