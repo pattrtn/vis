@@ -133,11 +133,6 @@ if st.button("Run"):
     # Display match percentage
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
-    # Drop geometry column for display in Streamlit
-    geo_data_gdf_display = geo_data_gdf.drop(columns=["geometry"])
-    st.write("**GeoDataFrame Before Filtering:**")
-    st.dataframe(geo_data_gdf_display.head())
-
     # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
     mapped_gdf = geo_data_gdf[
         (geo_data_gdf["district"] == district) &
@@ -149,7 +144,7 @@ if st.button("Run"):
     # Drop geometry column for display in Streamlit
     mapped_gdf_display = mapped_gdf.drop(columns=["geometry"], errors="ignore")
 
-    # Log filtered GeoDataFrame
+    # Display filtered GeoDataFrame
     st.write("**Filtered GeoDataFrame:**")
     st.dataframe(mapped_gdf_display)
 
