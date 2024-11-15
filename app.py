@@ -136,9 +136,8 @@ if st.button("Run"):
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
     st.write(district, subdistrict, province, postal_code)
-    st.write(geo_data[geo_data['district'] == 'บางกะปิ'])
-    st.write(geo_data[geo_data['district'] == 'คลองจั่น'])
-    st.write(geo_data['district'] == district)
+    st.write(geo_data[geo_data['district'] == subdistrict])
+    st.write(geo_data[geo_data['subdistrict'] == district])
     st.write(geo_data[geo_data['district'] == district])
     st.write(geo_data[geo_data['subdistrict'] == subdistrict])
     st.write(geo_data[geo_data['province'] == province])
@@ -150,9 +149,17 @@ if st.button("Run"):
         (geo_data["zipcode"] == postal_code)
     ]
 
+    mapped_data_2 = geo_data[
+        (geo_data["district"] == subdistrict) &
+        (geo_data["subdistrict"] == district) &
+        (geo_data["province"] == province) &
+        (geo_data["zipcode"] == postal_code)
+    ]
+
     # Display filtered data
     st.write("**Filtered Data:**")
     st.dataframe(mapped_data)
+    st.dataframe(mapped_data_2)
 
     # Visualization of predictions with color-coding
     st.subheader("Entity Visualization")
