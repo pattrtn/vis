@@ -60,12 +60,13 @@ def tokens_to_features(tokens, i):
     return features
 
 # Load data for dropdowns
-# Reads data from the provided Excel file to populate dropdown options for districts and subdistricts.
+# Reads data from the provided Excel file to populate dropdown options for districts, subdistricts, and provinces.
 file_path = './thaidata.xlsx'
 data = pd.read_excel(file_path, sheet_name='db')
-tambon_options = data['TambonThaiShort'].dropna().unique().tolist()  # Subdistrict options
+tambon_options = [""] + data['TambonThaiShort'].dropna().unique().tolist()  # Subdistrict options with default
 
-district_options = data['DistrictThaiShort'].dropna().unique().tolist()  # District options
+district_options = [""] + data['DistrictThaiShort'].dropna().unique().tolist()  # District options with default
+province_options = [""] + data['ProvinceThai'].dropna().unique().tolist()  # Province options with default
 
 # Streamlit app setup
 st.title("NER Model Visualization")
@@ -87,7 +88,7 @@ if model_file:
     address = st.text_input("ที่อยู่ (Address):")  # Address field
     district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
     subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
-    province = st.text_input("จังหวัด (Province):")  # Province field
+    province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
     postal_code = st.text_input("รหัสไปรษณีย์ (Postal Code):")  # Postal code field
 
     # Run button
