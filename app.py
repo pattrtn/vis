@@ -1,6 +1,8 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
 
 # Load CRF model
 # This function caches the loaded model to avoid reloading it multiple times during app execution.
@@ -70,6 +72,15 @@ province_options = [""] + data['ProvinceThai'].dropna().unique().tolist()  # Pro
 # Map postal codes to district, subdistrict, and province
 postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai'])['PostCodeMain'].to_dict()
 
+# Load GeoDataFrame for visualization
+geo_data_path = './thaidata.xlsx'
+geo_data = pd.read_excel(geo_data_path, sheet_name='geo')
+geo_data_gdf = gpd.GeoDataFrame(
+    geo_data,
+    geometry=gpd.points_from_xy(geo_data.longitude, geo_data.latitude),
+    crs="EPSG:4326"
+)
+
 # Streamlit app setup
 st.title("NER Model Visualization")
 st.markdown(
@@ -120,6 +131,26 @@ if st.button("Run"):
 
     # Display match percentage
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
+
+    # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
+    mapped_gdf = geo_data_gdf[
+        (geo_data_gdf["district"] == district) &
+        (geo_data_gdf["subdistrict"] == subdistrict) &
+        (geo_data_gdf["province"] == province) &
+        (geo_data_gdf["postal_code"] == postal_code)
+    ]
+
+    # Plot filtered geo-location data
+    st.subheader("Geo-Location Visualization")
+    if not mapped_gdf.empty:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        mapped_gdf.plot(ax=ax, color="blue", markersize=10)
+        ax.set_title("Filtered Geographic Locations", fontsize=15)
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
+        st.pyplot(fig)
+    else:
+        st.write("No matching geographic data found.")
 
     # Visualization of predictions with color-coding
     st.subheader("Entity Visualization")
