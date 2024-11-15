@@ -1,6 +1,7 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Load CRF model
 # This function caches the loaded model to avoid reloading it multiple times during app execution.
@@ -74,14 +75,6 @@ postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'P
 geo_data_path = './output.csv'
 geo_data = pd.read_csv(geo_data_path, encoding='utf-8')
 
-# Map subdistrict, district, province, and postal_code to geo_data
-# geo_data = geo_data.merge(
-#     data[['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain']],
-#     left_on=['subdistrict', 'district', 'province', 'zipcode'],
-#     right_on=['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain'],
-#     how='inner'
-# )
-
 # Streamlit app setup
 st.title("NER Model Visualization")
 st.markdown(
@@ -135,13 +128,6 @@ if st.button("Run"):
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
-    st.write(district, subdistrict, province, postal_code)
-    st.write(geo_data[geo_data['district'] == subdistrict])
-    st.write(geo_data[geo_data['subdistrict'] == district])
-    st.write(geo_data[geo_data['district'] == district])
-    st.write(geo_data[geo_data['subdistrict'] == subdistrict])
-    st.write(geo_data[geo_data['province'] == province])
-    st.write(geo_data[geo_data['zipcode'] == postal_code])
     mapped_data = geo_data[
         (geo_data["district"] == district) &
         (geo_data["subdistrict"] == subdistrict) &
@@ -161,6 +147,18 @@ if st.button("Run"):
     st.dataframe(mapped_data)
     st.dataframe(mapped_data_2)
 
+    # Plot geo map for mapped_data_2
+    if not mapped_data_2.empty:
+        st.subheader("Geo Map Visualization")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.scatter(mapped_data_2["longitude"], mapped_data_2["latitude"], c="blue", alpha=0.6)
+        ax.set_title("Filtered Geo Map Locations", fontsize=15)
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
+        st.pyplot(fig)
+    else:
+        st.write("No geographic data available for the specified filters.")
+
     # Visualization of predictions with color-coding
     st.subheader("Entity Visualization")
     for token, entity in results:
@@ -171,3 +169,4 @@ if st.button("Run"):
             "#90EE90"  # All other tokens are highlighted in light green
         )
         st.markdown(f"<span style='background-color:{color}'>{token} ({entity})</span>", unsafe_allow_html=True)  # Inline styling for visualization
+
