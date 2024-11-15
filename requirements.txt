@@ -4,3 +4,4 @@ streamlit
 plotly
 sklearn_crfsuite
 openpyxl
+geopandas
