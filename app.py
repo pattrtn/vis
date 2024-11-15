@@ -136,6 +136,7 @@ if st.button("Run"):
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
     st.write(district, subdistrict, province, postal_code)
+    st.write(geo_data['district'] == 'สมอแข')
     st.write(geo_data['district'] == district)
     st.write(geo_data[geo_data['district'] == district])
     st.write(geo_data[geo_data['subdistrict'] == subdistrict])
