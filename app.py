@@ -112,7 +112,14 @@ if st.button("Run"):
     expected_answers = ["O", "O"] + ["ADDR"] * (len(result_df) - 6) + ["LOC", "LOC", "LOC", "POST"]
     result_df["Validation"] = expected_answers[:len(result_df)]
 
+    # Calculate percentage of matches between Entity and Validation
+    result_df["Match"] = result_df["Entity"] == result_df["Validation"]
+    match_percentage = (result_df["Match"].sum() / len(result_df)) * 100
+
     st.dataframe(result_df)
+
+    # Display match percentage
+    st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
     # Visualization of predictions with color-coding
     st.subheader("Entity Visualization")
