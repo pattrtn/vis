@@ -134,6 +134,10 @@ if st.button("Run"):
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
     # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
+    st.write((geo_data_gdf["district"] == district))
+    st.write((geo_data_gdf["subdistrict"] == district))
+    st.write((geo_data_gdf["province"] == district))
+    st.write((geo_data_gdf["zipcode"] == district))
     mapped_gdf = geo_data_gdf[
         (geo_data_gdf["district"] == district) &
         (geo_data_gdf["subdistrict"] == subdistrict) &
