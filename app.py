@@ -137,10 +137,10 @@ if st.button("Run"):
     # Filter data based on mapping by district, subdistrict, province, and postal code
     st.write(subdistrict, district, province, postal_code)
 
-    st.write(geo_data['subdistrict'] == subdistrict)
-    st.write(geo_data['district'] == district)
-    st.write(geo_data['province'] == province)
-    st.write(geo_data['zipcode'] == postal_code)
+    st.write(geo_data[geo_data['subdistrict'] == subdistrict])
+    st.write(geo_data[geo_data['district'] == district])
+    st.write(geo_data[geo_data['province'] == province])
+    st.write(geo_data[geo_data['zipcode'] == postal_code])
     mapped_data = geo_data[
         (geo_data["subdistrict"] == subdistrict) &
         (geo_data["district"] == district) &
