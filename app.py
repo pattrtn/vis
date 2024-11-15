@@ -96,8 +96,8 @@ st.success("Model loaded successfully!")
 # Input fields for address components
 name = st.text_input("ชื่อ (Name):")  # Name field
 address = st.text_input("ที่อยู่ (Address):")  # Address field
-district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
-subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
+subdistrict = st.selectbox("ตำบล (Subdistrict):", options=tambon_options)  # Dropdown for subdistricts
+district = st.selectbox("อำเภอ (District):", options=district_options)  # Dropdown for districts
 province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
 
 # Automatically determine postal code based on district, subdistrict, and province
@@ -135,9 +135,9 @@ if st.button("Run"):
 
     # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
     st.write((geo_data_gdf["district"] == district))
-    st.write((geo_data_gdf["subdistrict"] == district))
-    st.write((geo_data_gdf["province"] == district))
-    st.write((geo_data_gdf["zipcode"] == district))
+    st.write((geo_data_gdf["subdistrict"] == subdistrict))
+    st.write((geo_data_gdf["province"] == province))
+    st.write((geo_data_gdf["zipcode"] == postal_code))
     mapped_gdf = geo_data_gdf[
         (geo_data_gdf["district"] == district) &
         (geo_data_gdf["subdistrict"] == subdistrict) &
@@ -146,11 +146,11 @@ if st.button("Run"):
     ]
 
     # Drop geometry column for display in Streamlit
-    # mapped_gdf_display = mapped_gdf.drop(columns=["geometry"], errors="ignore")
+    mapped_gdf_display = mapped_gdf.drop(columns=["geometry"], errors="ignore")
 
     # Display filtered GeoDataFrame
     st.write("**Filtered GeoDataFrame:**")
-    st.write(str(mapped_gdf))
+    st.write(str(mapped_gdf_display))
 
     # Plot filtered geo-location data
     st.subheader("Geo-Location Visualization")
