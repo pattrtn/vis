@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
 
 # Load CRF model
 # This function caches the loaded model to avoid reloading it multiple times during app execution.
@@ -75,6 +76,14 @@ postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'P
 geo_data_path = './output.csv'
 geo_data = pd.read_csv(geo_data_path, encoding='utf-8')
 
+# Map subdistrict, district, province, and postal_code to geo_data
+geo_data = geo_data.merge(
+    data[['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain']],
+    left_on=['subdistrict', 'district', 'province', 'zipcode'],
+    right_on=['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain'],
+    how='inner'
+)
+
 # Streamlit app setup
 st.title("NER Model Visualization")
 st.markdown(
@@ -129,15 +138,8 @@ if st.button("Run"):
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
     mapped_data = geo_data[
-        (geo_data["district"] == district) &
         (geo_data["subdistrict"] == subdistrict) &
-        (geo_data["province"] == province) &
-        (geo_data["zipcode"] == postal_code)
-    ]
-
-    mapped_data_2 = geo_data[
-        (geo_data["district"] == subdistrict) &
-        (geo_data["subdistrict"] == district) &
+        (geo_data["district"] == district) &
         (geo_data["province"] == province) &
         (geo_data["zipcode"] == postal_code)
     ]
@@ -145,19 +147,34 @@ if st.button("Run"):
     # Display filtered data
     st.write("**Filtered Data:**")
     st.dataframe(mapped_data)
-    st.dataframe(mapped_data_2)
 
-    # Plot geo map for mapped_data_2
-    if not mapped_data_2.empty:
-        st.subheader("Geo Map Visualization")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.scatter(mapped_data_2["longitude"], mapped_data_2["latitude"], c="blue", alpha=0.6)
-        ax.set_title("Filtered Geo Map Locations", fontsize=15)
-        ax.set_xlabel("Longitude")
-        ax.set_ylabel("Latitude")
+    # Plot locations on Thailand map
+    if not mapped_data.empty:
+        st.subheader("Location Visualization on Thailand Map")
+        fig, ax = plt.subplots(figsize=(10, 8))
+
+        # Initialize Basemap for Thailand
+        m = Basemap(
+            projection='merc',
+            llcrnrlat=5.5, urcrnrlat=20.5,
+            llcrnrlon=97.5, urcrnrlon=105.5,
+            resolution='i', ax=ax
+        )
+        m.drawcoastlines()
+        m.drawcountries()
+        m.drawmapboundary(fill_color='aqua')
+        m.fillcontinents(color='lightgray', lake_color='aqua')
+
+        # Plot each location
+        lons = mapped_data['longitude'].tolist()
+        lats = mapped_data['latitude'].tolist()
+        x, y = m(lons, lats)
+        m.scatter(x, y, marker='o', color='red', zorder=5)
+
+        plt.title("Filtered Locations in Thailand", fontsize=16)
         st.pyplot(fig)
     else:
-        st.write("No geographic data available for the specified filters.")
+        st.write("No matching geographic data found.")
 
     # Visualization of predictions with color-coding
     st.subheader("Entity Visualization")
@@ -169,4 +186,3 @@ if st.button("Run"):
             "#90EE90"  # All other tokens are highlighted in light green
         )
         st.markdown(f"<span style='background-color:{color}'>{token} ({entity})</span>", unsafe_allow_html=True)  # Inline styling for visualization
-
