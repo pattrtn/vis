@@ -77,48 +77,45 @@ st.markdown(
     trained for address extraction. Input the required fields and run the model to see predictions."""
 )
 
-# Upload CRF model
-# Allows users to upload a pre-trained CRF model in .joblib format.
-model_file = st.file_uploader("Upload CRF model (.joblib file):", type="joblib")
+# Load the CRF model from a predefined file path
+model_file_path = './model.joblib'
+model = load_model(model_file_path)  # Load the model
+st.success("Model loaded successfully!")
 
-if model_file:
-    model = load_model(model_file)  # Load the uploaded model
-    st.success("Model loaded successfully!")
+# Input fields for address components
+name = st.text_input("ชื่อ (Name):")  # Name field
+address = st.text_input("ที่อยู่ (Address):")  # Address field
+district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
+subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
+province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
 
-    # Input fields for address components
-    name = st.text_input("ชื่อ (Name):")  # Name field
-    address = st.text_input("ที่อยู่ (Address):")  # Address field
-    district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
-    subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
-    province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
+# Automatically determine postal code based on district, subdistrict, and province
+postal_code = ""
+if district and subdistrict and province:
+    postal_code = postal_code_mapping.get((district, subdistrict, province), "")
 
-    # Automatically determine postal code based on district, subdistrict, and province
-    postal_code = ""
-    if district and subdistrict and province:
-        postal_code = postal_code_mapping.get((district, subdistrict, province), "")
+st.text_input("รหัสไปรษณีย์ (Postal Code):", value=postal_code, disabled=True)  # Display postal code as a read-only field
 
-    st.text_input("รหัสไปรษณีย์ (Postal Code):", value=postal_code, disabled=True)  # Display postal code as a read-only field
+# Run button
+if st.button("Run"):
+    # Combine all inputs into a single text for processing
+    input_text = f"{name} {address} {district} {subdistrict} {province} {postal_code}"
 
-    # Run button
-    if st.button("Run"):
-        # Combine all inputs into a single text for processing
-        input_text = f"{name} {address} {district} {subdistrict} {province} {postal_code}"
+    # Run predictions on the combined input text
+    results = predict_entities(model, input_text)
 
-        # Run predictions on the combined input text
-        results = predict_entities(model, input_text)
+    # Display prediction results in a table
+    st.subheader("Prediction Results")
+    result_df = pd.DataFrame(results, columns=["Token", "Entity"])
+    st.dataframe(result_df)
 
-        # Display prediction results in a table
-        st.subheader("Prediction Results")
-        result_df = pd.DataFrame(results, columns=["Token", "Entity"])
-        st.dataframe(result_df)
-
-        # Visualization of predictions with color-coding
-        st.subheader("Entity Visualization")
-        for token, entity in results:
-            color = (
-                "#FFCCCB" if entity == "LOC" else  # Locations are highlighted in light red
-                "#D3D3D3" if entity == "POST" else  # Postal codes are highlighted in grey
-                "#ADD8E6" if entity == "ADDR" else  # Address elements are highlighted in light blue
-                "#90EE90"  # All other tokens are highlighted in light green
-            )
-            st.markdown(f"<span style='background-color:{color}'>{token} ({entity})</span>", unsafe_allow_html=True)  # Inline styling for visualization
+    # Visualization of predictions with color-coding
+    st.subheader("Entity Visualization")
+    for token, entity in results:
+        color = (
+            "#FFCCCB" if entity == "LOC" else  # Locations are highlighted in light red
+            "#D3D3D3" if entity == "POST" else  # Postal codes are highlighted in grey
+            "#ADD8E6" if entity == "ADDR" else  # Address elements are highlighted in light blue
+            "#90EE90"  # All other tokens are highlighted in light green
+        )
+        st.markdown(f"<span style='background-color:{color}'>{token} ({entity})</span>", unsafe_allow_html=True)  # Inline styling for visualization
