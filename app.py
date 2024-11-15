@@ -1,6 +1,8 @@
 import streamlit as st
 import joblib
 import pandas as pd
+pip install joblib
+
 
 # Load CRF model
 @st.cache_resource
