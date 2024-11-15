@@ -110,7 +110,7 @@ if st.button("Run"):
 
     # Add validation column with expected answers
     expected_answers = ["O", "O", "ADDR"] + ["ADDR"] * (len(result_df) - 5) + ["LOC", "LOC", "LOC", "POST"]
-    result_df["Validation"] = expected_answers[:len(result_df)]
+    # result_df["Validation"] = expected_answers[:len(result_df)]
 
     st.dataframe(result_df)
 
