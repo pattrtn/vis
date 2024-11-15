@@ -3,3 +3,4 @@ joblib
 streamlit
 plotly
 sklearn_crfsuite
+openpyxl
