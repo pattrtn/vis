@@ -138,8 +138,8 @@ if st.button("Run"):
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
     mapped_data = geo_data[
-        (geo_data["subdistrict"] == subdistrict) &
-        (geo_data["district"] == district) &
+        (geo_data["subdistrict"] == district) &
+        (geo_data["district"] == subdistrict) &
         (geo_data["province"] == province) &
         (geo_data["zipcode"] == postal_code)
     ]
