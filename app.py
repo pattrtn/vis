@@ -103,14 +103,14 @@ province = st.selectbox("จังหวัด (Province):", options=province_op
 # Automatically determine postal code based on district, subdistrict, and province
 postal_code = ""
 if district and subdistrict and province:
-    postal_code = postal_code_mapping.get((district, subdistrict, province), "")
+    postal_code = postal_code_mapping.get((subdistrict, district, province), "")
 
 st.text_input("รหัสไปรษณีย์ (Postal Code):", value=postal_code, disabled=True)  # Display postal code as a read-only field
 
 # Run button
 if st.button("Run"):
     # Combine all inputs into a single text for processing
-    input_text = f"{name} {address} {district} {subdistrict} {province} {postal_code}"
+    input_text = f"{name} {address} {subdistrict} {district} {province} {postal_code}"
 
     # Run predictions on the combined input text
     results = predict_entities(model, input_text)
@@ -134,13 +134,13 @@ if st.button("Run"):
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
     # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
-    st.write((geo_data_gdf["district"] == district))
-    st.write((geo_data_gdf["subdistrict"] == subdistrict))
+    st.write((geo_data_gdf["district"] == subdistrict))
+    st.write((geo_data_gdf["subdistrict"] == district))
     st.write((geo_data_gdf["province"] == province))
     st.write((geo_data_gdf["zipcode"] == postal_code))
     mapped_gdf = geo_data_gdf[
-        (geo_data_gdf["district"] == district) &
-        (geo_data_gdf["subdistrict"] == subdistrict) &
+        (geo_data_gdf["district"] == subdistrict) &
+        (geo_data_gdf["subdistrict"] == district) &
         (geo_data_gdf["province"] == province) &
         (geo_data_gdf["zipcode"] == postal_code)
     ]
