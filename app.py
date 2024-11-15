@@ -135,15 +135,15 @@ if st.button("Run"):
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
-    st.write(subdistrict, district, province, postal_code)
-
-    st.write(geo_data[geo_data['subdistrict'] == subdistrict])
+    st.write(district, subdistrict, province, postal_code)
+    st.write(geo_data['district'] == district)
     st.write(geo_data[geo_data['district'] == district])
+    st.write(geo_data[geo_data['subdistrict'] == subdistrict])
     st.write(geo_data[geo_data['province'] == province])
     st.write(geo_data[geo_data['zipcode'] == postal_code])
     mapped_data = geo_data[
-        (geo_data["subdistrict"] == subdistrict) &
         (geo_data["district"] == district) &
+        (geo_data["subdistrict"] == subdistrict) &
         (geo_data["province"] == province) &
         (geo_data["zipcode"] == postal_code)
     ]
