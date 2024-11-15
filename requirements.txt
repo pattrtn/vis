@@ -5,3 +5,4 @@ plotly
 sklearn_crfsuite
 openpyxl
 geopandas
+matplotlib
