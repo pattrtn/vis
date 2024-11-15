@@ -73,7 +73,7 @@ province_options = [""] + data['ProvinceThai'].dropna().unique().tolist()  # Pro
 postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai'])['PostCodeMain'].to_dict()
 
 # Load GeoDataFrame for visualization
-geo_data_path = './thaidata.xlsx'
+geo_data_path = './output.csv'
 geo_data = pd.read_csv(geo_data_path, encoding='utf-8')
 geo_data_gdf = gpd.GeoDataFrame(
     geo_data,
@@ -137,7 +137,7 @@ if st.button("Run"):
         (geo_data_gdf["district"] == district) &
         (geo_data_gdf["subdistrict"] == subdistrict) &
         (geo_data_gdf["province"] == province) &
-        (geo_data_gdf["postal_code"] == postal_code)
+        (geo_data_gdf["zipcode"] == postal_code)
     ]
 
     # Plot filtered geo-location data
