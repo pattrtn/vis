@@ -109,8 +109,8 @@ if st.button("Run"):
     result_df = pd.DataFrame(results, columns=["Token", "Entity"])
 
     # Add validation column with expected answers
-    expected_answers = ["O", "O", "ADDR"] + ["ADDR"] * (len(result_df) - 5) + ["LOC", "LOC", "LOC", "POST"]
-    # result_df["Validation"] = expected_answers[:len(result_df)]
+    expected_answers = ["O", "O"] + ["ADDR"] * (len(result_df) - 6) + ["LOC", "LOC", "LOC", "POST"]
+    result_df["Validation"] = expected_answers[:len(result_df)]
 
     st.dataframe(result_df)
 
