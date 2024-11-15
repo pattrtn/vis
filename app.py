@@ -75,12 +75,12 @@ geo_data_path = './output.csv'
 geo_data = pd.read_csv(geo_data_path, encoding='utf-8')
 
 # Map subdistrict, district, province, and postal_code to geo_data
-geo_data = geo_data.merge(
-    data[['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain']],
-    left_on=['subdistrict', 'district', 'province', 'zipcode'],
-    right_on=['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain'],
-    how='inner'
-)
+# geo_data = geo_data.merge(
+#     data[['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain']],
+#     left_on=['subdistrict', 'district', 'province', 'zipcode'],
+#     right_on=['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain'],
+#     how='inner'
+# )
 
 # Streamlit app setup
 st.title("NER Model Visualization")
