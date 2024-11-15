@@ -99,21 +99,21 @@ st.success("Model loaded successfully!")
 # Input fields for address components
 name = st.text_input("ชื่อ (Name):")  # Name field
 address = st.text_input("ที่อยู่ (Address):")  # Address field
-district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
-subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
+subdistrict = st.selectbox("ตำบล (Sub-district):", options=tambon_options)  # Dropdown for subdistricts
+district = st.selectbox("อำเภอ (District):", options=district_options)  # Dropdown for districts
 province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
 
 # Automatically determine postal code based on district, subdistrict, and province
 postal_code = ""
 if district and subdistrict and province:
-    postal_code = postal_code_mapping.get((district, subdistrict, province), "")
+    postal_code = postal_code_mapping.get((subdistrict, district, province), "")
 
 st.text_input("รหัสไปรษณีย์ (Postal Code):", value=postal_code, disabled=True)  # Display postal code as a read-only field
 
 # Run button
 if st.button("Run"):
     # Combine all inputs into a single text for processing
-    input_text = f"{name} {address} {district} {subdistrict} {province} {postal_code}"
+    input_text = f"{name} {address} {subdistrict} {district} {province} {postal_code}"
 
     # Run predictions on the combined input text
     results = predict_entities(model, input_text)
@@ -138,8 +138,8 @@ if st.button("Run"):
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
     mapped_data = geo_data[
-        (geo_data["subdistrict"] == district) &
-        (geo_data["district"] == subdistrict) &
+        (geo_data["subdistrict"] == subdistrict) &
+        (geo_data["district"] == district) &
         (geo_data["province"] == province) &
         (geo_data["zipcode"] == postal_code)
     ]
@@ -151,7 +151,10 @@ if st.button("Run"):
     # Plot locations on Thailand map using Leaflet
     if not mapped_data.empty:
         st.subheader("Location Visualization on Thailand Map")
-        thailand_map = folium.Map(location=[13.736717, 100.523186], zoom_start=6)
+        # Center map based on the average latitude and longitude of the mapped data
+        center_lat = mapped_data["latitude"].mean()
+        center_lon = mapped_data["longitude"].mean()
+        thailand_map = folium.Map(location=[center_lat, center_lon], zoom_start=10)
 
         # Add points to the map
         for _, row in mapped_data.iterrows():
