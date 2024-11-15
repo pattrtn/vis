@@ -127,21 +127,16 @@ if st.button("Run"):
     result_df["Match"] = result_df["Entity"] == result_df["Validation"]
     match_percentage = (result_df["Match"].sum() / len(result_df)) * 100
 
+    # Convert GeoDataFrame for Streamlit display compatibility
+    geo_data_gdf_display = geo_data_gdf.copy()
+    geo_data_gdf_display["geometry"] = geo_data_gdf_display["geometry"].astype(str)
+
     st.dataframe(result_df)
+    st.write("**GeoDataFrame Before Filtering:**")
+    st.dataframe(geo_data_gdf_display.head())
 
     # Display match percentage
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
-
-    # Log input fields for debugging
-    st.write("**Debug Info:**")
-    st.write(f"Selected District: {district}")
-    st.write(f"Selected Subdistrict: {subdistrict}")
-    st.write(f"Selected Province: {province}")
-    st.write(f"Determined Postal Code: {postal_code}")
-
-    # Log GeoDataFrame before filtering
-    st.write("**GeoDataFrame Before Filtering:**")
-    st.dataframe(geo_data_gdf.head())
 
     # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
     mapped_gdf = geo_data_gdf[
@@ -151,9 +146,13 @@ if st.button("Run"):
         (geo_data_gdf["zipcode"] == postal_code)
     ]
 
+    # Convert filtered GeoDataFrame for display
+    mapped_gdf_display = mapped_gdf.copy()
+    mapped_gdf_display["geometry"] = mapped_gdf_display["geometry"].astype(str)
+
     # Log filtered GeoDataFrame
     st.write("**Filtered GeoDataFrame:**")
-    st.dataframe(mapped_gdf)
+    st.dataframe(mapped_gdf_display)
 
     # Plot filtered geo-location data
     st.subheader("Geo-Location Visualization")
