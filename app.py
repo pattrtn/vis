@@ -1,8 +1,8 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
+from streamlit_folium import folium_static
+import folium
 
 # Load CRF model
 # This function caches the loaded model to avoid reloading it multiple times during app execution.
@@ -138,8 +138,8 @@ if st.button("Run"):
 
     # Filter data based on mapping by district, subdistrict, province, and postal code
     mapped_data = geo_data[
-        (geo_data["subdistrict"] == district) &
-        (geo_data["district"] == subdistrict) &
+        (geo_data["subdistrict"] == subdistrict) &
+        (geo_data["district"] == district) &
         (geo_data["province"] == province) &
         (geo_data["zipcode"] == postal_code)
     ]
@@ -148,38 +148,21 @@ if st.button("Run"):
     st.write("**Filtered Data:**")
     st.dataframe(mapped_data)
 
-    # Plot locations on Thailand map divided by provinces
+    # Plot locations on Thailand map using Leaflet
     if not mapped_data.empty:
-        st.subheader("Location Visualization by Province")
-        fig, ax = plt.subplots(figsize=(10, 8))
+        st.subheader("Location Visualization on Thailand Map")
+        thailand_map = folium.Map(location=[13.736717, 100.523186], zoom_start=6)
 
-        # Initialize Basemap for Thailand
-        m = Basemap(
-            projection='merc',
-            llcrnrlat=5.5, urcrnrlat=20.5,
-            llcrnrlon=97.5, urcrnrlon=105.5,
-            resolution='i', ax=ax
-        )
-        m.drawcoastlines()
-        m.drawcountries()
-        m.drawmapboundary(fill_color='aqua')
-        m.fillcontinents(color='lightgray', lake_color='aqua')
+        # Add points to the map
+        for _, row in mapped_data.iterrows():
+            folium.Marker(
+                location=[row['latitude'], row['longitude']],
+                popup=f"{row['subdistrict']}, {row['district']}, {row['province']} ({row['zipcode']})",
+                icon=folium.Icon(color='blue', icon='info-sign')
+            ).add_to(thailand_map)
 
-        # Plot each province with a unique color
-        provinces = mapped_data['province'].unique()
-        colors = plt.cm.tab20(range(len(provinces)))
-        province_color_map = {province: colors[i] for i, province in enumerate(provinces)}
-
-        for province in provinces:
-            province_data = mapped_data[mapped_data['province'] == province]
-            lons = province_data['longitude'].tolist()
-            lats = province_data['latitude'].tolist()
-            x, y = m(lons, lats)
-            m.scatter(x, y, marker='o', color=province_color_map[province], label=province, zorder=5)
-
-        plt.legend(loc='lower left', fontsize=8)
-        plt.title("Filtered Locations by Province in Thailand", fontsize=16)
-        st.pyplot(fig)
+        # Render the map in Streamlit
+        folium_static(thailand_map)
     else:
         st.write("No matching geographic data found.")
 
