@@ -142,11 +142,11 @@ if st.button("Run"):
     ]
 
     # Drop geometry column for display in Streamlit
-    mapped_gdf_display = mapped_gdf.drop(columns=["geometry"], errors="ignore")
+    # mapped_gdf_display = mapped_gdf.drop(columns=["geometry"], errors="ignore")
 
     # Display filtered GeoDataFrame
     st.write("**Filtered GeoDataFrame:**")
-    st.dataframe(mapped_gdf_display)
+    st.dataframe(mapped_gdf)
 
     # Plot filtered geo-location data
     st.subheader("Geo-Location Visualization")
