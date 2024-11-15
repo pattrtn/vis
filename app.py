@@ -74,7 +74,7 @@ postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'P
 
 # Load GeoDataFrame for visualization
 geo_data_path = './thaidata.xlsx'
-geo_data = pd.read_excel(geo_data_path, sheet_name='geo')
+geo_data = pd.read_csv(geo_data_path, encoding='utf-8')
 geo_data_gdf = gpd.GeoDataFrame(
     geo_data,
     geometry=gpd.points_from_xy(geo_data.longitude, geo_data.latitude),
