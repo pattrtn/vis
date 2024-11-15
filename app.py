@@ -1,8 +1,6 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import geopandas as gpd
-import matplotlib.pyplot as plt
 
 # Load CRF model
 # This function caches the loaded model to avoid reloading it multiple times during app execution.
@@ -72,13 +70,16 @@ province_options = [""] + data['ProvinceThai'].dropna().unique().tolist()  # Pro
 # Map postal codes to district, subdistrict, and province
 postal_code_mapping = data.set_index(['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai'])['PostCodeMain'].to_dict()
 
-# Load GeoDataFrame for visualization
+# Load data for mapping
 geo_data_path = './output.csv'
 geo_data = pd.read_csv(geo_data_path, encoding='utf-8')
-geo_data_gdf = gpd.GeoDataFrame(
-    geo_data,
-    geometry=gpd.points_from_xy(geo_data.longitude, geo_data.latitude),
-    crs="EPSG:4326"
+
+# Map subdistrict, district, province, and postal_code to geo_data
+geo_data = geo_data.merge(
+    data[['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain']],
+    left_on=['subdistrict', 'district', 'province', 'zipcode'],
+    right_on=['TambonThaiShort', 'DistrictThaiShort', 'ProvinceThai', 'PostCodeMain'],
+    how='inner'
 )
 
 # Streamlit app setup
@@ -96,21 +97,21 @@ st.success("Model loaded successfully!")
 # Input fields for address components
 name = st.text_input("ชื่อ (Name):")  # Name field
 address = st.text_input("ที่อยู่ (Address):")  # Address field
-subdistrict = st.selectbox("ตำบล (Subdistrict):", options=tambon_options)  # Dropdown for subdistricts
-district = st.selectbox("อำเภอ (District):", options=district_options)  # Dropdown for districts
+district = st.selectbox("ตำบล (District):", options=tambon_options)  # Dropdown for subdistricts
+subdistrict = st.selectbox("อำเภอ (Sub-district):", options=district_options)  # Dropdown for districts
 province = st.selectbox("จังหวัด (Province):", options=province_options)  # Dropdown for provinces
 
 # Automatically determine postal code based on district, subdistrict, and province
 postal_code = ""
 if district and subdistrict and province:
-    postal_code = postal_code_mapping.get((subdistrict, district, province), "")
+    postal_code = postal_code_mapping.get((district, subdistrict, province), "")
 
 st.text_input("รหัสไปรษณีย์ (Postal Code):", value=postal_code, disabled=True)  # Display postal code as a read-only field
 
 # Run button
 if st.button("Run"):
     # Combine all inputs into a single text for processing
-    input_text = f"{name} {address} {subdistrict} {district} {province} {postal_code}"
+    input_text = f"{name} {address} {district} {subdistrict} {province} {postal_code}"
 
     # Run predictions on the combined input text
     results = predict_entities(model, input_text)
@@ -133,36 +134,17 @@ if st.button("Run"):
     # Display match percentage
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
-    # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
-    st.write((geo_data_gdf["district"] == subdistrict))
-    st.write((geo_data_gdf["subdistrict"] == district))
-    st.write((geo_data_gdf["province"] == province))
-    st.write((geo_data_gdf["zipcode"] == postal_code))
-    mapped_gdf = geo_data_gdf[
-        (geo_data_gdf["district"] == subdistrict) &
-        (geo_data_gdf["subdistrict"] == district) &
-        (geo_data_gdf["province"] == province) &
-        (geo_data_gdf["zipcode"] == postal_code)
+    # Filter data based on mapping by district, subdistrict, province, and postal code
+    mapped_data = geo_data[
+        (geo_data["subdistrict"] == subdistrict) &
+        (geo_data["district"] == district) &
+        (geo_data["province"] == province) &
+        (geo_data["zipcode"] == postal_code)
     ]
 
-    # Drop geometry column for display in Streamlit
-    mapped_gdf_display = mapped_gdf.drop(columns=["geometry"], errors="ignore")
-
-    # Display filtered GeoDataFrame
-    st.write("**Filtered GeoDataFrame:**")
-    st.write(str(mapped_gdf_display))
-
-    # Plot filtered geo-location data
-    st.subheader("Geo-Location Visualization")
-    if not mapped_gdf.empty:
-        fig, ax = plt.subplots(figsize=(10, 6))
-        mapped_gdf.plot(ax=ax, color="blue", markersize=10)
-        ax.set_title("Filtered Geographic Locations", fontsize=15)
-        ax.set_xlabel("Longitude")
-        ax.set_ylabel("Latitude")
-        st.pyplot(fig)
-    else:
-        st.write("No matching geographic data found.")
+    # Display filtered data
+    st.write("**Filtered Data:**")
+    st.dataframe(mapped_data)
 
     # Visualization of predictions with color-coding
     st.subheader("Entity Visualization")
