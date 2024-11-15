@@ -107,6 +107,11 @@ if st.button("Run"):
     # Display prediction results in a table
     st.subheader("Prediction Results")
     result_df = pd.DataFrame(results, columns=["Token", "Entity"])
+
+    # Add validation column with expected answers
+    expected_answers = ["O", "O", "ADDR"] + ["ADDR"] * (len(result_df) - 5) + ["LOC", "LOC", "LOC", "POST"]
+    result_df["Validation"] = expected_answers[:len(result_df)]
+
     st.dataframe(result_df)
 
     # Visualization of predictions with color-coding
