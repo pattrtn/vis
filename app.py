@@ -132,6 +132,17 @@ if st.button("Run"):
     # Display match percentage
     st.metric(label="Validation Accuracy", value=f"{match_percentage:.2f}%")
 
+    # Log input fields for debugging
+    st.write("**Debug Info:**")
+    st.write(f"Selected District: {district}")
+    st.write(f"Selected Subdistrict: {subdistrict}")
+    st.write(f"Selected Province: {province}")
+    st.write(f"Determined Postal Code: {postal_code}")
+
+    # Log GeoDataFrame before filtering
+    st.write("**GeoDataFrame Before Filtering:**")
+    st.dataframe(geo_data_gdf.head())
+
     # Filter GeoDataFrame based on result_df mapping by district, subdistrict, province, and postal code
     mapped_gdf = geo_data_gdf[
         (geo_data_gdf["district"] == district) &
@@ -139,6 +150,10 @@ if st.button("Run"):
         (geo_data_gdf["province"] == province) &
         (geo_data_gdf["zipcode"] == postal_code)
     ]
+
+    # Log filtered GeoDataFrame
+    st.write("**Filtered GeoDataFrame:**")
+    st.dataframe(mapped_gdf)
 
     # Plot filtered geo-location data
     st.subheader("Geo-Location Visualization")
