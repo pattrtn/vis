@@ -86,6 +86,8 @@ geo_data = geo_data.merge(
 
 # Streamlit app setup
 st.title("NER Model Visualization")
+
+st.markdown("[Open Live Demo](https://vis3hover-am9wyq7bpg6kvgtjuaaoyw.streamlit.app/) for this visualization!")
 st.markdown(
     """This app allows you to visualize and interact with a Named Entity Recognition (NER) model
     trained for address extraction. Input the required fields and run the model to see predictions."""
